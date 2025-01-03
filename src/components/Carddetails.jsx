@@ -1,23 +1,35 @@
-import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import React, { useContext, useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import axios from '../utils/Axios'
 import Loading from './Loading'
-
+import { ProductContext } from '../utils/Context';
+import { ToastContainer,toast } from 'react-toastify';
 const Carddetails=()=> {
+  const [products, setproducts] = useContext(ProductContext);    
   const [product, setproduct] =  useState(null);
   const {id} = useParams()
-    const getsingleproduct = async()=>{
-    try {
-      const {data} = await axios.get(`/products/${id}`)
-      setproduct(data);
-    } catch (error) {
-      console.log(error)
-    }
+  const navigate = useNavigate()
+  //   const getsingleproduct = async()=>{
+  //   try {
+  //     const {data} = await axios.get(`/products/${id}`)
+  //     setproduct(data);
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  // }
+  const deleteproducthandler = (id) =>{
+    const filteredproduct = products.filter((p)=>p.id!==id);
+    setproducts(filteredproduct)
+    localStorage.setItem("products",JSON.stringify(filteredproduct))
+    toast.success("Product deleted successfully")
+    navigate("/")
   }
 
   useEffect(()=>{
-    getsingleproduct()
-  },[])
+    if(!product){
+      setproduct(products.filter((p)=>p.id == id)[0])
+    }
+  },[]) 
 
   return product?(
       <div className="w-[100%] h-screen overflow-x-hidden overflow-y-auto flex items-center justify-center ">
@@ -32,8 +44,8 @@ const Carddetails=()=> {
             <div className='text-green-600 text-lg font-bold'>${product.price}</div>
             <div className='text-zinc-700 py-3'>{product.description} </div>
             <div className='flex gap-3'>
-              <button className='px-5 py-2 bg-blue-600 rounded-md text-sm font-semibold text-zinc-100'>Edit</button>
-              <button className='px-5 py-2 bg-red-600 rounded-md text-sm font-semibold text-zinc-100'>Delete</button>
+              <Link to={`/edit/${id}`} className='px-5 py-2 bg-blue-600 rounded-md text-sm font-semibold text-zinc-100'>Edit</Link>
+              <button onClick={()=>deleteproducthandler(product.id)} className='px-5 py-2 bg-red-600 rounded-md text-sm font-semibold text-zinc-100'>Delete</button>
             </div>
           </div>
         </div>
